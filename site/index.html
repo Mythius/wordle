@@ -1,1 +1,229 @@
-<link rel="icon" type="image/x-icon" href="icon.png">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=372, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+	<title>Wordle</title>
+	<link rel="icon" type="image/x-icon" href="icon.png">
+	<script src="helpers.js"></script>
+	<style>
+		html, body {
+		  overscroll-behavior: none;
+		}
+		body{
+			margin-left: 5px;
+			position: relative;
+		}
+		box{
+			width: 64px;
+			height: 64px;
+			color: white;
+			border: 2px solid lightgray;
+			display: block;
+			margin-right: 8px;
+			color: black;
+			user-select: none;
+			font-size: 50px;
+			font-family: sans-serif;
+			text-align: center;
+			padding-top: 3px;
+/*			box-sizing: border-box;*/
+		}
+		row{
+			display: flex;
+			margin-bottom: 8px;
+		}
+		div{
+			position: fixed;
+/*			left: 50%;*/
+/*			transform: translateX(-50%);*/
+		}
+		key{
+			background-color: lightgray;
+			padding: 10px;
+			font-size: 22px;
+			margin-right: 2px;
+			text-align: center;
+			display: block;
+			color: #123;
+			font-family: sans-serif;
+			font-weight: bold;
+			user-select: none;
+		}
+		row1{
+			display: grid;
+			grid-template-columns: repeat(10,10%);
+			width: 372px;
+			margin-bottom: 2px;
+		}
+		row2{
+			display: grid;
+			grid-template-columns: repeat(9,10%);
+			width: 372px;
+			margin-bottom: 2px;
+			margin-left: calc(372px / 20);
+		}
+		row3{
+			display: grid;
+			grid-template-columns: repeat(9,10%);
+			width: 372px;
+			margin-left: calc(372px / 20);
+		}
+		row3 key:first-of-type{
+			width: 100%;
+			font-size: 12px;
+			transform: translateX(-22px);
+			left: 0;
+			padding-top: 45%;
+		}
+		row3 key:last-of-type{
+			width: 100%;    
+			padding-top: 7px;
+		}
+	</style>
+</head>
+<body>
+
+	<div>
+		<row><box></box><box></box><box></box><box></box><box></box></row>
+		<row><box></box><box></box><box></box><box></box><box></box></row>
+		<row><box></box><box></box><box></box><box></box><box></box></row>
+		<row><box></box><box></box><box></box><box></box><box></box></row>
+		<row><box></box><box></box><box></box><box></box><box></box></row>
+		<row><box></box><box></box><box></box><box></box><box></box></row>
+		<br>
+		<keyboard>
+		</keyboard>
+	</div>
+	<script>
+
+		var guess = 1,cursor=1;
+		const keys = 'qwertyuiopasdfghjklzxcvbnm⌫';
+		var guessable = [],answers=[];
+
+		var answer = "spree";
+
+		function setupKeyboard(){
+			let keyboard = obj('keyboard');
+			let i=0,row1=create('row1'),row2=create('row2'),row3=create('row3');
+			for(let key of keys){
+				let k = create('key',key.toUpperCase());
+				k.on('click',e=>{
+					addLetter(key.toUpperCase())
+				})
+				i++;
+				if(i<=10){ row1.appendChild(k); continue; }
+				if(i<=19){ 
+					row2.appendChild(k); 
+					if(i==19){
+						let enter = create('key','ENTER');
+						enter.on('click',checkWord);
+						row3.append(enter);
+					}
+					continue; 
+				}
+				if(i<=27){ row3.appendChild(k); continue; }
+			}
+
+			keyboard.append(row1,row2,row3);
+		}
+
+		function getWords(){
+			fetch('guessable.txt').then(e=>e.text().then(words=>{
+				guessable = words.split('\n');
+			}));
+			fetch('answers.txt').then(e=>e.text().then(words=>{
+				answers = words.split('\n');
+				let r = random(0,answers.length);
+				answer = answers[r];
+			}));
+		}
+
+		getWords();
+
+		document.on('keydown',e=>{
+			if(keys.includes(e.key)){
+				addLetter(e.key.toUpperCase());
+			}
+			if(e.keyCode == 8){
+				backspace();
+			}
+			if(e.keyCode == 13){
+				checkWord();
+			}
+		})
+
+
+		function addLetter(letter){
+			if(letter == '⌫'){
+				backspace();
+				return;
+			}
+			if(cursor < 6){
+				let row = [...document.querySelectorAll('row')];
+				row[guess-1].children[cursor-1].innerHTML = letter;
+				cursor++;
+			}
+		}
+
+		function backspace(){
+			if(cursor>1){
+				cursor--;
+				let row = [...document.querySelectorAll('row')];
+				row[guess-1].children[cursor-1].innerHTML = '';
+			}
+		}
+
+		function checkWord(){
+			let row = [...document.querySelectorAll('row')];
+			const word = row[guess-1].innerText.replaceAll('\n','').toLowerCase();
+			if(word.length==5){
+				if(guessable.includes(word) || answers.includes(word)){
+					colorTiles(word);
+					guess++;
+					cursor=1;
+				} else {
+					console.log('Word not found: '+word)
+				}
+			}
+		}
+
+		function colorTiles(guessword){
+			let row = [...document.querySelectorAll('row')];
+			const boxes = row[guess-1].children;
+			let yellow_letters = '';
+			for(let i=0;i<guessword.length;i++){
+				if(guessword[i]==answer[i]){
+					boxes[i].style.backgroundColor = 'green';
+					highlightKeyboard(guessword[i],'green');
+				} else {
+					yellow_letters += answer[i];
+				}
+			}
+			for(let i=0;i<guessword.length;i++){
+				if(boxes[i].style.backgroundColor == 'green') continue;
+				if(yellow_letters.includes(guessword[i])){
+					boxes[i].style.backgroundColor = 'yellow';
+					highlightKeyboard(guessword[i],'yellow');
+					yellow_letters.replace(guessword[i],'');
+				} else {
+					boxes[i].style.backgroundColor = 'gray';
+					highlightKeyboard(guessword[i],'gray');
+				}
+			}
+		}
+
+		function highlightKeyboard(letter,color){
+			let el = [...document.querySelectorAll('key')].filter(e=>e.innerText==letter.toUpperCase())[0];
+			if(el.style.backgroundColor != 'green'){
+				el.style.backgroundColor = color;
+			}
+		}
+
+
+		setupKeyboard();
+
+
+	</script>
+</body>
+</html>
