@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="width=372, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+	<<meta name="viewport" content="width=382, user-scalable=0">
 	<title>Wordle</title>
 	<link rel="icon" type="image/x-icon" href="icon.png">
 	<script src="helpers.js"></script>
@@ -101,7 +101,7 @@
 		const keys = 'qwertyuiopasdfghjklzxcvbnm⌫';
 		var guessable = [],answers=[];
 
-		var answer = "spree";
+		var answer = "brave";
 
 		function setupKeyboard(){
 			let keyboard = obj('keyboard');
@@ -205,7 +205,7 @@
 				if(yellow_letters.includes(guessword[i])){
 					boxes[i].style.backgroundColor = 'yellow';
 					highlightKeyboard(guessword[i],'yellow');
-					yellow_letters.replace(guessword[i],'');
+					yellow_letters = yellow_letters.replace(guessword[i],'');
 				} else {
 					boxes[i].style.backgroundColor = 'gray';
 					highlightKeyboard(guessword[i],'gray');
@@ -215,7 +215,9 @@
 
 		function highlightKeyboard(letter,color){
 			let el = [...document.querySelectorAll('key')].filter(e=>e.innerText==letter.toUpperCase())[0];
+			let cur_color = el.style.backgroundColor;
 			if(el.style.backgroundColor != 'green'){
+				if(cur_color=='yellow'&&color=='gray') return;
 				el.style.backgroundColor = color;
 			}
 		}
