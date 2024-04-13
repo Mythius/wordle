@@ -162,6 +162,7 @@ function setupEvents(c){
 	});
 	c.socket.on('w-report',data=>{
 		c.stats.push(data);
+		if(!data.win) data.guess++;
 		c.game.playerFinished(c);
 		if(LOG) console.log(data);
 	});

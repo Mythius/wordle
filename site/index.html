@@ -441,7 +441,7 @@
     }
 
     function report(win,guess,word){
-    	if(win){
+    	if(win || guess==6){
     		let t2 = new Date;
     		let seconds = (t2-START_TIME)/1000;
     		socket.emit('w-report',{win,guess,seconds});
