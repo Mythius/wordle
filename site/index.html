@@ -1,231 +1,517 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-	<meta charset="UTF-8">
-	<<meta name="viewport" content="width=382, user-scalable=0">
-	<title>Wordle</title>
-	<link rel="icon" type="image/x-icon" href="icon.png">
-	<script src="helpers.js"></script>
-	<style>
-		html, body {
-		  overscroll-behavior: none;
-		}
-		body{
-			margin-left: 5px;
-			position: relative;
-		}
-		box{
-			width: 64px;
-			height: 64px;
-			color: white;
-			border: 2px solid lightgray;
-			display: block;
-			margin-right: 8px;
-			color: black;
-			user-select: none;
-			font-size: 50px;
-			font-family: sans-serif;
-			text-align: center;
-			padding-top: 3px;
-/*			box-sizing: border-box;*/
-		}
-		row{
-			display: flex;
-			margin-bottom: 8px;
-		}
-		div{
-			position: fixed;
-/*			left: 50%;*/
-/*			transform: translateX(-50%);*/
-		}
-		key{
-			background-color: lightgray;
-			padding: 10px;
-			font-size: 22px;
-			margin-right: 2px;
-			text-align: center;
-			display: block;
-			color: #123;
-			font-family: sans-serif;
-			font-weight: bold;
-			user-select: none;
-		}
-		row1{
-			display: grid;
-			grid-template-columns: repeat(10,10%);
-			width: 372px;
-			margin-bottom: 2px;
-		}
-		row2{
-			display: grid;
-			grid-template-columns: repeat(9,10%);
-			width: 372px;
-			margin-bottom: 2px;
-			margin-left: calc(372px / 20);
-		}
-		row3{
-			display: grid;
-			grid-template-columns: repeat(9,10%);
-			width: 372px;
-			margin-left: calc(372px / 20);
-		}
-		row3 key:first-of-type{
-			width: 100%;
-			font-size: 12px;
-			transform: translateX(-22px);
-			left: 0;
-			padding-top: 45%;
-		}
-		row3 key:last-of-type{
-			width: 100%;    
-			padding-top: 7px;
-		}
-	</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=382, user-scalable=0">
+    <title>Wordle</title>
+    <link rel="icon" type="image/x-icon" href="icon.png">
+    <script src=/socket.io/socket.io.js> </script> <script src="helpers.js"></script>
+    <style>
+    html,
+    body {
+        overscroll-behavior: none;
+        color: #123;
+        font-family: sans-serif;
+    }
+
+    body {
+        margin-left: 5px;
+        position: relative;
+    }
+
+    box {
+        width: 64px;
+        height: 64px;
+        color: white;
+        border: 2px solid lightgray;
+        display: block;
+        margin-right: 8px;
+        color: black;
+        user-select: none;
+        font-size: 50px;
+        font-family: sans-serif;
+        text-align: center;
+        padding-top: 3px;
+        /*			box-sizing: border-box;*/
+    }
+
+    row {
+        display: flex;
+        margin-bottom: 8px;
+    }
+
+    key {
+        background-color: lightgray;
+        padding: 10px;
+        font-size: 22px;
+        margin-right: 2px;
+        text-align: center;
+        display: block;
+        color: #123;
+        font-family: sans-serif;
+        font-weight: bold;
+        user-select: none;
+    }
+
+    row1 {
+        display: grid;
+        grid-template-columns: repeat(10, 10%);
+        width: 372px;
+        margin-bottom: 2px;
+    }
+
+    row2 {
+        display: grid;
+        grid-template-columns: repeat(9, 10%);
+        width: 372px;
+        margin-bottom: 2px;
+        margin-left: calc(372px / 20);
+    }
+
+    row3 {
+        display: grid;
+        grid-template-columns: repeat(9, 10%);
+        width: 372px;
+        margin-left: calc(372px / 20);
+    }
+
+    row3 key:first-of-type {
+        width: 100%;
+        font-size: 12px;
+        transform: translateX(-22px);
+        left: 0;
+        padding-top: 45%;
+    }
+
+    row3 key:last-of-type {
+        width: 100%;
+        padding-top: 7px;
+    }
+
+    button {
+        background-color: lightgray;
+        border: 0;
+        color: #123;
+        font-family: sans-serif;
+        text-align: center;
+        padding: 10px;
+        font-size: 22px;
+        font-weight: bold;
+        width: calc(382px - 10px);
+        margin-bottom: 5px;
+    }
+
+    #lobby,
+    #leaderboard,
+    #start,
+    #sec2,
+    #swap {
+        display: none;
+    }
+    #players>div,#oplayers>div{
+    	box-sizing: border-box;
+        background-color: lightgray;
+        border: 0;
+        color: #123;
+        font-family: sans-serif;
+        padding: 10px;
+        font-size: 22px;
+        font-weight: bold;
+        width: calc(382px - 10px);
+        margin-bottom: 5px;
+        display: grid;
+        grid-template-columns: 40% 30% 20%;
+    }
+    #start,#swap{
+    	position: fixed;
+    	bottom: 0;
+    	width: calc(382px - 10px);
+    }
+    #message{
+    	margin-top: 5px;
+    }
+    </style>
 </head>
+
 <body>
+    <div id=menubar>
+        <button id=menu>Menu</button>
+    </div>
+    <div id=game>
+        <row>
+            <box></box>
+            <box></box>
+            <box></box>
+            <box></box>
+            <box></box>
+        </row>
+        <row>
+            <box></box>
+            <box></box>
+            <box></box>
+            <box></box>
+            <box></box>
+        </row>
+        <row>
+            <box></box>
+            <box></box>
+            <box></box>
+            <box></box>
+            <box></box>
+        </row>
+        <row>
+            <box></box>
+            <box></box>
+            <box></box>
+            <box></box>
+            <box></box>
+        </row>
+        <row>
+            <box></box>
+            <box></box>
+            <box></box>
+            <box></box>
+            <box></box>
+        </row>
+        <row>
+            <box></box>
+            <box></box>
+            <box></box>
+            <box></box>
+            <box></box>
+        </row>
+        <br>
+        <keyboard>
+        </keyboard>
+    </div>
+    <div id=lobby>
+        <button id=create>Create Game</button>
+        <div id="games"></div>
+    </div>
+    <div id=leaderboard>
+    	<div id="sec1">
+	        <h2>Leaderboard</h2>
+	        <div id="players"></div>
+	    </div>
+    	<div id="sec2">
+	        <h2>Overall Leaderboard</h2>
+	        <div id="oplayers"></div>
+	    </div>
+	    <button id=swap>See Overall</button>
+    </div>
+    <div id="message"></div>
+    <button id=start>Start</button>
+    <script>
+    var guess = 1,
+        cursor = 1;
+    const keys = 'qwertyuiopasdfghjklzxcvbnm⌫';
+    var guessable = [],
+        answers = [];
+    var set_word = false;
+    var server_report = false;
+    var START_TIME;
 
-	<div>
-		<row><box></box><box></box><box></box><box></box><box></box></row>
-		<row><box></box><box></box><box></box><box></box><box></box></row>
-		<row><box></box><box></box><box></box><box></box><box></box></row>
-		<row><box></box><box></box><box></box><box></box><box></box></row>
-		<row><box></box><box></box><box></box><box></box><box></box></row>
-		<row><box></box><box></box><box></box><box></box><box></box></row>
-		<br>
-		<keyboard>
-		</keyboard>
-	</div>
-	<script>
+    const socket = io();
 
-		var guess = 1,cursor=1;
-		const keys = 'qwertyuiopasdfghjklzxcvbnm⌫';
-		var guessable = [],answers=[];
+    var answer = "brave";
 
-		var answer = "brave";
+    function setupKeyboard() {
+        let keyboard = obj('keyboard');
+        let i = 0,
+            row1 = create('row1'),
+            row2 = create('row2'),
+            row3 = create('row3');
+        for (let key of keys) {
+            let k = create('key', key.toUpperCase());
+            k.on('click', e => {
+                addLetter(key.toUpperCase())
+            })
+            i++;
+            if (i <= 10) { row1.appendChild(k); continue; }
+            if (i <= 19) {
+                row2.appendChild(k);
+                if (i == 19) {
+                    let enter = create('key', 'ENTER');
+                    enter.on('click', checkWord);
+                    row3.append(enter);
+                }
+                continue;
+            }
+            if (i <= 27) { row3.appendChild(k); continue; }
+        }
 
-		function setupKeyboard(){
-			let keyboard = obj('keyboard');
-			let i=0,row1=create('row1'),row2=create('row2'),row3=create('row3');
-			for(let key of keys){
-				let k = create('key',key.toUpperCase());
-				k.on('click',e=>{
-					addLetter(key.toUpperCase())
-				})
-				i++;
-				if(i<=10){ row1.appendChild(k); continue; }
-				if(i<=19){ 
-					row2.appendChild(k); 
-					if(i==19){
-						let enter = create('key','ENTER');
-						enter.on('click',checkWord);
-						row3.append(enter);
-					}
-					continue; 
-				}
-				if(i<=27){ row3.appendChild(k); continue; }
-			}
+        keyboard.append(row1, row2, row3);
+    }
 
-			keyboard.append(row1,row2,row3);
-		}
+    function getWords() {
+        fetch('guessable.txt').then(e => e.text().then(words => {
+            guessable = words.split('\n');
+        }));
+        fetch('answers.txt').then(e => e.text().then(words => {
+            answers = words.split('\n');
+            let r = random(0, answers.length);
+            answer = answers[r];
+        }));
+    }
 
-		function getWords(){
-			fetch('guessable.txt').then(e=>e.text().then(words=>{
-				guessable = words.split('\n');
-			}));
-			fetch('answers.txt').then(e=>e.text().then(words=>{
-				answers = words.split('\n');
-				let r = random(0,answers.length);
-				answer = answers[r];
-			}));
-		}
+    getWords();
 
-		getWords();
-
-		document.on('keydown',e=>{
-			if(keys.includes(e.key)){
-				addLetter(e.key.toUpperCase());
-			}
-			if(e.keyCode == 8){
-				backspace();
-			}
-			if(e.keyCode == 13){
-				checkWord();
-			}
-		})
-
-
-		function addLetter(letter){
-			if(letter == '⌫'){
-				backspace();
-				return;
-			}
-			if(cursor < 6){
-				let row = [...document.querySelectorAll('row')];
-				row[guess-1].children[cursor-1].innerHTML = letter;
-				cursor++;
-			}
-		}
-
-		function backspace(){
-			if(cursor>1){
-				cursor--;
-				let row = [...document.querySelectorAll('row')];
-				row[guess-1].children[cursor-1].innerHTML = '';
-			}
-		}
-
-		function checkWord(){
-			let row = [...document.querySelectorAll('row')];
-			const word = row[guess-1].innerText.replaceAll('\n','').toLowerCase();
-			if(word.length==5){
-				if(guessable.includes(word) || answers.includes(word)){
-					colorTiles(word);
-					guess++;
-					cursor=1;
-				} else {
-					console.log('Word not found: '+word)
-				}
-			}
-		}
-
-		function colorTiles(guessword){
-			let row = [...document.querySelectorAll('row')];
-			const boxes = row[guess-1].children;
-			let yellow_letters = '';
-			for(let i=0;i<guessword.length;i++){
-				if(guessword[i]==answer[i]){
-					boxes[i].style.backgroundColor = 'green';
-					highlightKeyboard(guessword[i],'green');
-				} else {
-					yellow_letters += answer[i];
-				}
-			}
-			for(let i=0;i<guessword.length;i++){
-				if(boxes[i].style.backgroundColor == 'green') continue;
-				if(yellow_letters.includes(guessword[i])){
-					boxes[i].style.backgroundColor = 'yellow';
-					highlightKeyboard(guessword[i],'yellow');
-					yellow_letters = yellow_letters.replace(guessword[i],'');
-				} else {
-					boxes[i].style.backgroundColor = 'gray';
-					highlightKeyboard(guessword[i],'gray');
-				}
-			}
-		}
-
-		function highlightKeyboard(letter,color){
-			let el = [...document.querySelectorAll('key')].filter(e=>e.innerText==letter.toUpperCase())[0];
-			let cur_color = el.style.backgroundColor;
-			if(el.style.backgroundColor != 'green'){
-				if(cur_color=='yellow'&&color=='gray') return;
-				el.style.backgroundColor = color;
-			}
-		}
+    document.on('keydown', e => {
+        if (keys.includes(e.key)) {
+            addLetter(e.key.toUpperCase());
+        }
+        if (e.keyCode == 8) {
+            backspace();
+        }
+        if (e.keyCode == 13) {
+            checkWord();
+        }
+    })
 
 
-		setupKeyboard();
+    function addLetter(letter) {
+        if (letter == '⌫') {
+            backspace();
+            return;
+        }
+        if (cursor < 6) {
+            let row = [...document.querySelectorAll('row')];
+            row[guess - 1].children[cursor - 1].innerHTML = letter;
+            cursor++;
+        }
+    }
 
+    function backspace() {
+        if (cursor > 1) {
+            cursor--;
+            let row = [...document.querySelectorAll('row')];
+            row[guess - 1].children[cursor - 1].innerHTML = '';
+        }
+    }
 
-	</script>
+    function clearGame(){
+    	START_TIME = new Date;
+    	guess = 1;
+    	cursor = 1;
+    	let boxes = [...document.querySelectorAll('box')];
+    	for(let b of boxes){
+			b.style.backgroundColor = 'white';
+			b.innerHTML = '';
+    	}
+    	let keys = [...document.querySelectorAll('key')];
+    	for(let k of keys){
+    		k.style.backgroundColor = 'lightgray';
+    	}
+    }
+
+    function checkWord() {
+        let row = [...document.querySelectorAll('row')];
+        const word = row[guess - 1].innerText.replaceAll('\n', '').toLowerCase();
+        if (word.length == 5) {
+            if (guessable.includes(word) || answers.includes(word)) {
+                if(set_word){
+                	if(answers.includes(word)){
+                		answer = word;
+		                colorTiles(word);
+		                sendWord(word);
+                	} else {
+                		answer = '#####';
+		                colorTiles(word);
+		                setTimeout(clearGame,2000);
+                	}
+                } else {
+	                let win = colorTiles(word);
+	                if(server_report) report(win,guess,word);
+	                guess++;
+	                cursor = 1;
+                }
+            } else {
+                console.log('Word not found: ' + word)
+            }
+        }
+    }
+
+    function colorTiles(guessword) {
+    	let win = true;
+        let row = [...document.querySelectorAll('row')];
+        const boxes = row[guess - 1].children;
+        let yellow_letters = '';
+        for (let i = 0; i < guessword.length; i++) {
+            if (guessword[i] == answer[i]) {
+                boxes[i].style.backgroundColor = 'green';
+                highlightKeyboard(guessword[i], 'green');
+            } else {
+                yellow_letters += answer[i];
+      			win = false;
+            }
+        }
+        for (let i = 0; i < guessword.length; i++) {
+            if (boxes[i].style.backgroundColor == 'green') continue;
+            if (yellow_letters.includes(guessword[i])) {
+                boxes[i].style.backgroundColor = 'yellow';
+                highlightKeyboard(guessword[i], 'yellow');
+                yellow_letters = yellow_letters.replace(guessword[i], '');
+            } else {
+                boxes[i].style.backgroundColor = 'gray';
+                highlightKeyboard(guessword[i], 'gray');
+            }
+        }
+        return win;
+    }
+
+    function highlightKeyboard(letter, color) {
+        let el = [...document.querySelectorAll('key')].filter(e => e.innerText == letter.toUpperCase())[0];
+        let cur_color = el.style.backgroundColor;
+        if (el.style.backgroundColor != 'green') {
+            if (cur_color == 'yellow' && color == 'gray') return;
+            el.style.backgroundColor = color;
+        }
+    }
+
+    let screen = 'single';
+    obj('#menu').on('click', e => {
+        if (screen == 'single') {
+            screen = 'menu';
+            hide(obj('#game'));
+            show(obj('#lobby'));
+            socket.emit('w-join');
+        } else if (screen == 'menu') {
+            screen = 'single';
+            show(obj('#game'));
+            hide(obj('#lobby'));
+        }
+    });
+
+    obj('#create').on('click', e => {
+        let name = prompt('Enter your name');
+        if (name) {
+            socket.emit('w-name', name);
+            setTimeout(_ => { socket.emit('w-newgame'); }, 10);
+        }
+    });
+
+    socket.on('w-games', games => {
+        obj('#games').innerHTML = '';
+        for (let g of games) {
+            let c = create('button', 'Join ' + g);
+            c.on('click', e => {
+                let name = prompt('Enter your name');
+                if (name) {
+                    socket.emit('w-name', name);
+                    socket.emit('w-join-game', g);
+                }
+            });
+            obj('#games').appendChild(c);
+        }
+    });
+
+    socket.on('w-joined', people => {
+        hide(obj('#lobby'));
+        hide(obj('#menubar'));
+        screen = 'wait';
+        show(obj('#leaderboard'))
+        obj('#players').innerHTML = '';
+        for (let p of people) {
+            obj('#players').appendChild(create('div', p));
+        }
+    });
+
+    socket.on('w-start-req',e=>{
+    	show(obj('#start'));
+    });
+
+    obj('#start').on('click',e=>{
+    	socket.emit('w-start');
+    	hide(obj('#start'));
+    });
+
+    socket.on('w-choose',_=>{
+    	clearGame();
+    	hide(obj('#leaderboard'));
+    	hide(obj('#start'));
+    	show(obj('#game'));
+    	set_word = true;
+    });
+
+    function sendWord(word){
+    	socket.emit('w-chose-word',word);
+    	set_word = false;
+    	setTimeout(clearGame,2000);
+    }
+
+    function report(win,guess,word){
+    	if(win){
+    		let t2 = new Date;
+    		let seconds = (t2-START_TIME)/1000;
+    		socket.emit('w-report',{win,guess,seconds});
+    		server_report = false;
+    	}
+    }
+
+    socket.on('w-setword',word=>{
+    	clearGame();
+    	answer = word;
+    	hide(obj('#leaderboard'));
+    	hide(obj('#start'));
+    	hide(obj('#swap'));
+    	show(obj('#game'));
+    	server_report = true;
+    });
+
+    socket.on('w-message',message=>{
+    	obj('#message').innerHTML = message;
+    });
+
+    socket.on('w-leaderstat',stats=>{
+    	hide(obj('#game'));
+    	show(obj('#leaderboard'));
+    	show(obj('#swap'));
+    	let r = obj('#players');
+    	let o = obj('#oplayers');
+    	r.innerHTML = '';
+    	o.innerHTML = '';
+    	let lrstat = stats.filter(e=>e.last_guess).sort((a,b)=>a.last_time-b.last_time);
+    	lrstat.sort((a,b)=>a.total_guess-b.total_guess);
+    	let oastat = stats.sort((a,b)=>a.total_time-b.total_time);
+    	oastat.sort((a,b)=>a.total_guess-b.total_guess);
+    	for(let s of lrstat){
+  			let row = create('div');
+    		row.appendChild(create('div',s.name));
+    		row.appendChild(create('div',`(${s.last_guess})`));
+    		let a = s.last_time;
+    		let time = Math.floor(a/60)+':'+('0'+Math.floor(a)%60).slice(-2)
+    		row.appendChild(create('div',time));
+    		r.appendChild(row);
+    	}
+    	for(let s of oastat){
+  			let row = create('div');	
+    		row.appendChild(create('div',s.name));
+    		row.appendChild(create('div',`(${s.total_guess})`));
+    		let a = s.total_time;
+    		let time = Math.floor(a/60)+':'+('0'+Math.floor(a)%60).slice(-2)
+    		row.appendChild(create('div',time));
+    		o.appendChild(row);
+    	}
+    });
+
+    let lbswap = true;
+    obj('#swap').on('click',e=>{
+    	if(lbswap){
+    		obj('#swap').innerHTML = 'See Last Round'
+    		show(obj('#sec2'))
+    		hide(obj('#sec1'))
+
+    	} else {
+    		obj('#swap').innerHTML = 'See Overall';
+    		hide(obj('#sec2'))
+    		show(obj('#sec1'))
+    	}
+		lbswap = !lbswap;
+    });
+
+    setupKeyboard();
+    </script>
 </body>
+
 </html>

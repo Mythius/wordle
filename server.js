@@ -4,6 +4,7 @@ var http = require('http').createServer(app);
 var io = require('socket.io')(http);
 var fs = require('fs');
 var system = require('child_process');
+const Wordle = require('./wordle.js');
 
 var file = {
 	save: function(name,text){
@@ -31,7 +32,9 @@ class client{
 			if(index != -1){
 				client.all.splice(index,1);
 			}
+			Wordle.remove(this);
 		});
+		socket.on('w-join',name=>{Wordle.join(this,name)});
 	}
 	emit(name,dat){
 		this.socket.emit(name,dat);
