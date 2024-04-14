@@ -21,8 +21,6 @@ class Game{
 		    this.players.push(client);
 		    client.game = this;
 		    this.updateInGamePlayers();
-			setupEvents(client);
-			sendOpenGames(client);
 		}
 	}
 	remove(client){
@@ -127,7 +125,12 @@ function sendOpenGames(c){
 }
 
 function join(client){
-	players.push(client);
+ if(client.join!='wordle'){
+	  players.push(client);
+   setupEvents(client);
+			sendOpenGames(client);
+ }
+ client.join = 'wordle';
 }
 
 function remove(client){
