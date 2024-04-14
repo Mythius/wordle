@@ -445,6 +445,7 @@
     }
 
     function report(win,guess,word){
+        if(!server_report) return;
     	if(win || guess==6){
     		let t2 = new Date;
     		let seconds = (t2-START_TIME)/1000;

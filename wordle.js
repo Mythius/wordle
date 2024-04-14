@@ -21,6 +21,8 @@ class Game{
 		    this.players.push(client);
 		    client.game = this;
 		    this.updateInGamePlayers();
+			setupEvents(client);
+			sendOpenGames(client);
 		}
 	}
 	remove(client){
@@ -126,8 +128,6 @@ function sendOpenGames(c){
 
 function join(client){
 	players.push(client);
-	setupEvents(client);
-	sendOpenGames(client);
 }
 
 function remove(client){
