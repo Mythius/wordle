@@ -384,11 +384,13 @@
     });
 
     obj('#create').on('click', e => {
-        let name = prompt('Enter your name');
-        if (name) {
-            socket.emit('w-name', name);
-            setTimeout(_ => { socket.emit('w-newgame'); }, 10);
-        }
+	setTimeout(()=>{
+       	    let name = prompt('Enter your name');
+            if (name) {
+                socket.emit('w-name', name);
+                setTimeout(_ => { socket.emit('w-newgame'); }, 10);
+            }
+	},10);
     });
 
     socket.on('w-games', games => {
@@ -396,11 +398,13 @@
         for (let g of games) {
             let c = create('button', 'Join ' + g);
             c.on('click', e => {
-                let name = prompt('Enter your name');
-                if (name) {
-                    socket.emit('w-name', name);
-                    socket.emit('w-join-game', g);
-                }
+		setTimeout(()=>{
+                    let name = prompt('Enter your name');
+                    if (name) {
+                    	socket.emit('w-name', name);
+                    	socket.emit('w-join-game', g);
+                    }
+		},10);
             });
             obj('#games').appendChild(c);
         }

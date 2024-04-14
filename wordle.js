@@ -16,9 +16,12 @@ class Game{
 		this.updateInGamePlayers();
 	}
 	add(client){
-		this.players.push(client);
-		client.game = this;
-		this.updateInGamePlayers();
+		let ix = this.players.indexOf(client);
+		if(ix==-1){
+		    this.players.push(client);
+		    client.game = this;
+		    this.updateInGamePlayers();
+		}
 	}
 	remove(client){
 		let ix = this.players.indexOf(client);
